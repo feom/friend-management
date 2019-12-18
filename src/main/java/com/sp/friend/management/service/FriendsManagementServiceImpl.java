@@ -1,6 +1,6 @@
 package com.sp.friend.management.service;
 
-import com.sp.friend.management.FriendManagementException;
+import com.sp.friend.management.FriendsManagementException;
 import com.sp.friend.management.domain.User;
 import com.sp.friend.management.repository.UserRepository;
 import org.apache.commons.logging.Log;
@@ -8,15 +8,16 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class FriendManagementServiceImpl implements FriendsManagementService {
+public class FriendsManagementServiceImpl implements FriendsManagementService {
 
-    private static final Log logger = LogFactory.getLog(FriendManagementServiceImpl.class);
+    private static final Log logger = LogFactory.getLog(FriendsManagementServiceImpl.class);
 
     private final UserRepository repository;
 
-    public FriendManagementServiceImpl(UserRepository repository) {
+    public FriendsManagementServiceImpl(UserRepository repository) {
         this.repository = repository;
     }
 
@@ -25,10 +26,10 @@ public class FriendManagementServiceImpl implements FriendsManagementService {
      * create a friend connection by adding each other to the list of friends.
      *
      * @param users
-     * @throws FriendManagementException
+     * @throws FriendsManagementException
      */
     @Override
-    public void createFriendsConnection(List<String> users) throws FriendManagementException {
+    public void createFriendsConnection(List<String> users) throws FriendsManagementException {
         for (String email : users) {
             User outerUser = getUser(email);
 
@@ -45,7 +46,13 @@ public class FriendManagementServiceImpl implements FriendsManagementService {
         }
     }
 
-    private User getUser(String email) throws FriendManagementException {
+    @Override
+    public List<String> retrieveFriendsList(String email) throws FriendsManagementException {
+        User user = getUser(email);
+        return user.getFriends().stream().map(User::getEmail).collect(Collectors.toList());
+    }
+
+    private User getUser(String email) throws FriendsManagementException {
         List<User> users = repository.findByEmail(email);
         validateUniqueEmail(users);
         if (users.isEmpty()) {
@@ -56,9 +63,9 @@ public class FriendManagementServiceImpl implements FriendsManagementService {
         }
     }
 
-    private void validateUniqueEmail(List<User> users) throws FriendManagementException {
+    private void validateUniqueEmail(List<User> users) throws FriendsManagementException {
         if (users.size() > 1) {
-            throw new FriendManagementException("more than one user with the same email address!");
+            throw new FriendsManagementException("more than one user with the same email address!");
         }
     }
 

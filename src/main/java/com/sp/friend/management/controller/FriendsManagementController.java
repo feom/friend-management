@@ -1,7 +1,8 @@
 package com.sp.friend.management.controller;
 
-import com.sp.friend.management.FriendManagementException;
+import com.sp.friend.management.FriendsManagementException;
 import com.sp.friend.management.dto.FriendsConnectionRequest;
+import com.sp.friend.management.dto.FriendsListRequest;
 import com.sp.friend.management.dto.FriendsResponseBody;
 import com.sp.friend.management.service.FriendsManagementService;
 import org.apache.commons.logging.Log;
@@ -14,13 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-public class FriendManagementController {
+public class FriendsManagementController {
 
-    private static final Log logger = LogFactory.getLog(FriendManagementController.class);
+    private static final Log logger = LogFactory.getLog(FriendsManagementController.class);
 
     private final FriendsManagementService friendsManagementService;
 
-    public FriendManagementController(FriendsManagementService friendsManagementService) {
+    public FriendsManagementController(FriendsManagementService friendsManagementService) {
         this.friendsManagementService = friendsManagementService;
     }
 
@@ -33,7 +34,21 @@ public class FriendManagementController {
         try {
             friendsManagementService.createFriendsConnection(friends);
             return ResponseEntity.ok().body(FriendsResponseBody.builder(true).build());
-        } catch (FriendManagementException e) {
+        } catch (FriendsManagementException e) {
+            e.printStackTrace();
+            FriendsResponseBody friendsResponseBody = FriendsResponseBody.builder(false).withStatusMessage(e.getMessage()).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(friendsResponseBody);
+        }
+    }
+
+    @PostMapping("/friends/list")
+    public ResponseEntity<FriendsResponseBody> retrieveFriendsList(@RequestBody FriendsListRequest friendsListRequest) {
+        logger.info("friends list ");
+        try {
+            List<String> friendsList = friendsManagementService.retrieveFriendsList(friendsListRequest.getEmail());
+            FriendsResponseBody responseBody = FriendsResponseBody.builder(true).withFriendsList(friendsList).build();
+            return ResponseEntity.ok().body(responseBody);
+        } catch (FriendsManagementException e) {
             e.printStackTrace();
             FriendsResponseBody friendsResponseBody = FriendsResponseBody.builder(false).withStatusMessage(e.getMessage()).build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(friendsResponseBody);

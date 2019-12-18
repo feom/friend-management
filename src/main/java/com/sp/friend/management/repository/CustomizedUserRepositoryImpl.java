@@ -2,8 +2,6 @@ package com.sp.friend.management.repository;
 
 import com.sp.friend.management.domain.User;
 
-import java.util.stream.Collectors;
-
 public class CustomizedUserRepositoryImpl implements CustomizedUserRepository {
 
     @Override

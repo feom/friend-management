@@ -1,6 +1,6 @@
 package com.sp.friend.management.service;
 
-import com.sp.friend.management.FriendManagementException;
+import com.sp.friend.management.FriendsManagementException;
 import com.sp.friend.management.domain.User;
 import com.sp.friend.management.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-class FriendManagementServiceImplTest {
+class FriendsManagementServiceImplTest {
 
     @Autowired
     UserRepository userRepository;
@@ -23,7 +23,7 @@ class FriendManagementServiceImplTest {
     FriendsManagementService friendManagementService;
 
     @Test
-    void test_when_createFriendConnection_then_friendsConnectionBetweenUsersExists() throws FriendManagementException {
+    void test_when_createFriendConnection_then_friendsConnectionBetweenUsersExists() throws FriendsManagementException {
         String first = "andy@example.com";
         String second = "john@example.com";
         List<String> users = new ArrayList<>();
@@ -38,15 +38,40 @@ class FriendManagementServiceImplTest {
     }
 
     @Test
-    void test_when_createFriendConnectionBetweenOneself_then_noFriendsConnectionExists() throws FriendManagementException {
+    void test_when_createFriendConnectionBetweenOneself_then_noFriendsConnectionExists() throws FriendsManagementException {
         String email = "andy@example.com";
         List<String> users = new ArrayList<>();
         users.add(email);
         friendManagementService.createFriendsConnection(users);
         User user = userRepository.findByEmail(email).get(0);
-
         assertFalse(userRepository.isFriendsWith(user, user));
     }
+
+    @Test
+    void test_when_retrieveFriendsForUserWithFriends_then_listOfFriendsRetrieved() throws FriendsManagementException {
+        String first = "andy@example.com";
+        String second = "john@example.com";
+        List<String> users = new ArrayList<>();
+        users.add(first);
+        users.add(second);
+        friendManagementService.createFriendsConnection(users);
+        List<String> friendsList = friendManagementService.retrieveFriendsList(first);
+        assertFalse(friendsList.isEmpty());
+    }
+
+    @Test
+    void test_when_retrieveFriendsForUserWithNoFriends_then_listOfFriendsEmpty() throws FriendsManagementException {
+        String first = "andy@example.com";
+        List<String> users = new ArrayList<>();
+        users.add(first);
+        friendManagementService.createFriendsConnection(users);
+        List<String> friendsList = friendManagementService.retrieveFriendsList(first);
+        assertTrue(friendsList.isEmpty());
+    }
+
+
+
+
 
 
 
