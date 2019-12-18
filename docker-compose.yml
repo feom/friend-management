@@ -1,0 +1,12 @@
+version: '3.7'
+
+# Define services
+services:
+  # api server
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Expose ports
+    restart: always
