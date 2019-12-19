@@ -7,7 +7,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,18 +25,18 @@ public class FriendsManagementServiceImpl implements FriendsManagementService {
     }
 
     /**
-     * For each pair in the users lists, create a new user if the user doesnt exist yet and
+     * For each pair in the userEmails lists, create a new user if the user doesnt exist yet and
      * create a friend connection by adding each other to the list of friends.
      *
-     * @param users
+     * @param userEmails
      * @throws FriendsManagementException
      */
     @Override
-    public void createFriendsConnection(List<String> users) throws FriendsManagementException {
-        for (String email : users) {
+    public void createFriendsConnection(List<String> userEmails) throws FriendsManagementException {
+        for (String email : userEmails) {
             User outerUser = getUser(email);
 
-            for (String emailInner : users) {
+            for (String emailInner : userEmails) {
                 User innerUser = getUser(emailInner);
                 if (innerUser.getEmail().equals(outerUser.getEmail())) {
                     continue; // cannot be friends with oneself
@@ -50,6 +53,29 @@ public class FriendsManagementServiceImpl implements FriendsManagementService {
     public List<String> retrieveFriendsList(String email) throws FriendsManagementException {
         User user = getUser(email);
         return user.getFriends().stream().map(User::getEmail).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> retrieveCommonFriendsList(List<String> userEmails) throws FriendsManagementException {
+        List<Set<User>> usersFriends = new ArrayList<>();
+
+        for (String email : userEmails) {
+            User user = getUser(email);
+            usersFriends.add(user.getFriends());
+        }
+
+        Set<User> intersection = new HashSet<>();
+        boolean firstUser = true;
+        for (Set<User> userFriends : usersFriends) {
+            if (firstUser) {
+                intersection.addAll(userFriends);
+                firstUser = false;
+            } else {
+                intersection.retainAll(userFriends);
+            }
+        }
+
+        return intersection.stream().map(User::getEmail).collect(Collectors.toList());
     }
 
     private User getUser(String email) throws FriendsManagementException {

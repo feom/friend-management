@@ -28,36 +28,37 @@ public class FriendsManagementController {
     // TODO for all services dto input validations
 
     @PostMapping("/friends")
-    public ResponseEntity<FriendsResponseBody> createFriendsConnection(@RequestBody FriendsConnectionRequest friendsConnectionRequest) {
+    public ResponseEntity<FriendsResponseBody> createFriendsConnection(@RequestBody FriendsConnectionRequest friendsConnectionRequest) throws FriendsManagementException {
         List<String> friends = friendsConnectionRequest.getFriends();
-
-        try {
-            friendsManagementService.createFriendsConnection(friends);
-            return ResponseEntity.ok().body(FriendsResponseBody.builder(true).build());
-        } catch (FriendsManagementException e) {
-            e.printStackTrace();
-            FriendsResponseBody friendsResponseBody = FriendsResponseBody.builder(false).withStatusMessage(e.getMessage()).build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(friendsResponseBody);
-        }
+        friendsManagementService.createFriendsConnection(friends);
+        return ResponseEntity.ok().body(FriendsResponseBody.builder(true).build());
     }
 
     @PostMapping("/friends/list")
-    public ResponseEntity<FriendsResponseBody> retrieveFriendsList(@RequestBody FriendsListRequest friendsListRequest) {
-        logger.info("friends list ");
-        try {
-            List<String> friendsList = friendsManagementService.retrieveFriendsList(friendsListRequest.getEmail());
-            FriendsResponseBody responseBody = FriendsResponseBody.builder(true).withFriendsList(friendsList).build();
-            return ResponseEntity.ok().body(responseBody);
-        } catch (FriendsManagementException e) {
-            e.printStackTrace();
-            FriendsResponseBody friendsResponseBody = FriendsResponseBody.builder(false).withStatusMessage(e.getMessage()).build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(friendsResponseBody);
-        }
+    public ResponseEntity<FriendsResponseBody> retrieveFriendsList(@RequestBody FriendsListRequest friendsListRequest) throws FriendsManagementException {
+        List<String> friendsList = friendsManagementService.retrieveFriendsList(friendsListRequest.getEmail());
+        FriendsResponseBody responseBody = FriendsResponseBody.builder(true).withFriendsList(friendsList).build();
+        return ResponseEntity.ok().body(responseBody);
+    }
+
+    @PostMapping("/friends/common/list")
+    public ResponseEntity<FriendsResponseBody> retrieveCommonFriendsList(@RequestBody FriendsConnectionRequest friendsConnectionRequest) throws FriendsManagementException {
+        List<String> commonFriendsList = friendsManagementService.retrieveCommonFriendsList(friendsConnectionRequest.getFriends());
+        FriendsResponseBody responseBody = FriendsResponseBody.builder(true).withFriendsList(commonFriendsList).build();
+        return ResponseEntity.ok().body(responseBody);
+    }
+
+
+    @ExceptionHandler({FriendsManagementException.class})
+    public final ResponseEntity<FriendsResponseBody> handleFriendsManagementException(FriendsManagementException ex) {
+        logger.error("friends management exception handler: " + ex.toString());
+        FriendsResponseBody friendsResponseBody = FriendsResponseBody.builder(false).withStatusMessage(ex.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(friendsResponseBody);
     }
 
     @ExceptionHandler({RuntimeException.class})
     public final ResponseEntity<FriendsResponseBody> handleExceptions(RuntimeException ex) {
-        logger.error("exception handler invoked: " + ex.toString());
+        logger.error("exception handler: " + ex.toString());
         FriendsResponseBody friendsResponseBody = FriendsResponseBody.builder(false).withStatusMessage(ex.toString()).build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(friendsResponseBody);
     }

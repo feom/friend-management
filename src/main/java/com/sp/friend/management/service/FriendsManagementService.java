@@ -7,4 +7,5 @@ import java.util.List;
 public interface FriendsManagementService {
     void createFriendsConnection(List<String> users) throws FriendsManagementException;
     List<String> retrieveFriendsList(String email) throws FriendsManagementException;
+    List<String> retrieveCommonFriendsList(List<String> friends) throws FriendsManagementException;
 }

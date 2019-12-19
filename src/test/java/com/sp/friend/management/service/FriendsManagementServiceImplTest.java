@@ -3,6 +3,7 @@ package com.sp.friend.management.service;
 import com.sp.friend.management.FriendsManagementException;
 import com.sp.friend.management.domain.User;
 import com.sp.friend.management.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,11 @@ class FriendsManagementServiceImplTest {
 
     @Autowired
     FriendsManagementService friendManagementService;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
 
     @Test
     void test_when_createFriendConnection_then_friendsConnectionBetweenUsersExists() throws FriendsManagementException {
@@ -67,6 +73,24 @@ class FriendsManagementServiceImplTest {
         friendManagementService.createFriendsConnection(users);
         List<String> friendsList = friendManagementService.retrieveFriendsList(first);
         assertTrue(friendsList.isEmpty());
+    }
+
+    @Test
+    void test_when_retrieveCommonFriends_then_listOfCommonFriendsRetrieved() throws FriendsManagementException {
+        String first = "andy@example.com";
+        String second = "john@example.com";
+        String common = "common@example.com";
+        List<String> users = new ArrayList<>();
+        users.add(first);
+        users.add(second);
+        users.add(common);
+        friendManagementService.createFriendsConnection(users);
+        List<String> commonUsers = new ArrayList<>();
+        commonUsers.add(first);
+        commonUsers.add(second);
+        List<String> friendsList = friendManagementService.retrieveCommonFriendsList(commonUsers);
+
+        assertTrue(friendsList.contains(common));
     }
 
 
